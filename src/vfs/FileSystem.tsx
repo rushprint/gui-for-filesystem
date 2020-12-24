@@ -6,16 +6,19 @@ export enum FileType {
 }
 
 export interface FileEntry {
-    type(): FileType  //  entry type
-    name(): string    //  entry name
+    type(): FileType        //  entry type
+    name(): string          //  entry name
+    properties(): string[]
+    children(): FileEntry[]
+    depth(): number
 }
 
 export interface FileSystem {
     createDirectories(params: string[]): void
     createFiles(params: string[]): void
-    move(arg0: string, arg1: string): void
-    link(arg0: string, arg1: string): void
-    change(arg0: string, arg1: string): void
+    move(src: string, dest: string): void
+    link(src: string, dest: string): void
+    change(target: string, property: string): void
 
-    getChildren(directory: string): FileEntry[]
+    getRoot(): FileEntry;
 }

@@ -1,4 +1,3 @@
-import { PathNotExist } from "../AppErrors";
 import { FileEntry, FileSystem, FileType } from "./FileSystem";
 import { VirtualFileEntry } from "./VirfualFileEntry";
 
@@ -32,12 +31,8 @@ export class VirtualFileSystem implements FileSystem {
         throw new Error('Method not implemented.');
     }
 
-    getChildren(directory: string): FileEntry[] {
-        const node = this.find(directory)
-        if (!node) {
-            throw new PathNotExist()
-        }
-        return node.children()
+    getRoot(): FileEntry {
+        return this._root
     }
 
     private parsePath(path: string): string[] {
