@@ -1,3 +1,3 @@
 # GUI for file system
 
-This project is a simple project for person use.
+This project is a simple project for personal use.
