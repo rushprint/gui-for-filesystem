@@ -4,6 +4,7 @@ import './App.css';
 import { Command, parseCommand } from './Commands';
 import { VirtualFileSystem } from './vfs/VirtualFileSystem';
 import { FileSystem } from './vfs/FileSystem';
+import { FileSystemTree } from './ui/FileSystemTree';
 
 class App extends React.Component implements CommandInputHandler {
   render() {
@@ -20,6 +21,9 @@ class App extends React.Component implements CommandInputHandler {
         <CommandInput handler={this} command="move /b/b/m /a/" />
         <CommandInput handler={this} command="change /b/b hide" />
         <CommandInput handler={this} command="" />
+
+        <p>File System Tree</p>
+        <FileSystemTree fs={this.fileSystem}></FileSystemTree>
       </div>
     );
   }
