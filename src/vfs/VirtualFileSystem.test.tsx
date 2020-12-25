@@ -259,4 +259,3 @@ test('Linking a directory /a to /a/b (loop link) must fail', () => {
     expect(() => { fs.createDirectory('/a') }).not.toThrow()
     expect(() => { fs.link('/a', '/a/a') }).toThrow(LoopLinkIsNotAllowed)
 });
-

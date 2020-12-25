@@ -36,7 +36,7 @@ export function parseCommand(input: string): CommandAndParams {
 
     switch (command) {
         case "add":
-            if (splitted.length < 1) {
+            if (splitted.length < 2) {
                 throw new InvalidParamCount();
             }
             const command = splitted[0].toLowerCase()
@@ -65,13 +65,13 @@ export function parseCommand(input: string): CommandAndParams {
             }
             break
         case "move":
-            if (splitted.length < 2) {
+            if (splitted.length !== 2) {
                 throw new InvalidParamCount();
             }
             commandAndParams.command = Command.Move
             break
         case "change":
-            if (splitted.length < 2) {
+            if (splitted.length !== 2) {
                 throw new InvalidParamCount();
             }
             commandAndParams.command = Command.Change
