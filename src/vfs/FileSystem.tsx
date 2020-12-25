@@ -54,6 +54,10 @@ export interface FileSystem {
     // - if target is directory children will have same properties.
     change(target: string, property: string): void
 
+    // Remove file, link or directories
+    // - if target is directory then it's sub items will be removed also.
+    delete(targets: string[]): void
+
     // return FileEntry object or throw an exception.
     getEntry(path: string): FileEntry;
 }

@@ -41,6 +41,8 @@ class App extends React.Component<AppProperties, AppState> implements CommandInp
         <CommandInput handler={this} command="link /a /b/a/c/a" />
         <CommandInput handler={this} command="move /b/b/m /a/" comment="Moving directory is not supported."/>
         <CommandInput handler={this} command="change /b/b hide" comment="Toggle properties, apply children recursively."/>
+        <CommandInput handler={this} command="delete /b/b/k" comment="Delete a file."/>
+        <CommandInput handler={this} command="delete /b/b" comment="Deleting directory will remove sub items also."/>
         <CommandInput handler={this} command="" comment="Custom command input"/>
 
         <button onClick={this.reset}>Reset</button>
@@ -58,6 +60,11 @@ class App extends React.Component<AppProperties, AppState> implements CommandInp
         <li>properties are toggle values. change property twice will turn on and off.</li>
         <li>move operation does not support moving directories.</li>
         <li>move operation will replace file if target already exist.</li>
+        <li>delete operation will remove all the sub items.</li>
+        <li>delete operation will not affect links that are point deleted items.</li>
+        <li>Moved items will keep old properties.</li>
+        <li>Newly created items won’t inherit properties from the parent directory.</li>
+
 
         <h2>Exceptions</h2>
 
@@ -119,20 +126,23 @@ class App extends React.Component<AppProperties, AppState> implements CommandInp
   private handleCommand(parsed: CommandAndParams) {
       switch (parsed.command) {
         case Command.AddDir:
-          this.fileSystem.createDirectories(parsed.params);
-          break;
+          this.fileSystem.createDirectories(parsed.params)
+          break
         case Command.AddFile:
           this.fileSystem.createFiles(parsed.params);
-          break;
+          break
         case Command.Link:
           this.fileSystem.link(parsed.params[0], parsed.params[1]);
-          break;
+          break
         case Command.Move:
           this.fileSystem.move(parsed.params[0], parsed.params[1]);
-          break;
+          break
         case Command.Change:
           this.fileSystem.change(parsed.params[0], parsed.params[1]);
-          break;
+          break
+        case Command.Delete:
+          this.fileSystem.delete(parsed.params)
+          break
       }
   }
 }

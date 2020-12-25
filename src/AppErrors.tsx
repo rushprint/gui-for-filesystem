@@ -18,3 +18,9 @@ export class UnknownCommand extends Error {
     }
 }
 
+export class NotImplemented extends Error {
+    constructor() {
+        super('Not Implemented')
+    }
+}
+

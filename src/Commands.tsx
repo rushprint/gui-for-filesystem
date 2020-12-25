@@ -6,7 +6,8 @@ export enum Command {
     AddFile,
     Link,
     Move,
-    Change
+    Change,
+    Delete
 }
 
 export interface CommandAndParams {
@@ -76,6 +77,12 @@ export function parseCommand(input: string): CommandAndParams {
             }
             commandAndParams.command = Command.Change
             break
+        case "delete":
+            if (splitted.length < 1) {
+                throw new InvalidParamCount();
+            }
+            commandAndParams.command = Command.Delete
+            break;
         default:
             throw new UnknownCommand()
     }
