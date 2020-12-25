@@ -21,16 +21,14 @@ export interface FileEntry {
 /**
  * A Simple virtual file system.
  *
- * Assumptions
+ * Assumptions & Limitations
  * - path delimeter is '/'
  * - root directory is '/'
- *
- * Limitations
- * - all parameter path must be full path(start from /)
+ * - properties are toggle values. change property twice will turn on and off.
+ * - all path parameters must be full-path. (start from /)
  * - all file and directory names must not have any space characters
- * - move operation accept full path only for both of source and destination
- * - move operation will fail if target is already exist. <= can be implemented to replace.
  * - move operation does not support moving directories.
+ * - move operation will replace file if target already exist.
  */
 
 export interface FileSystem {

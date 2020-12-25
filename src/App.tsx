@@ -30,22 +30,40 @@ class App extends React.Component<AppProperties, AppState> implements CommandInp
   render() {
     return (
       <div>
-        <h3>GUI for file system</h3>
+        <h1>GUI for file system</h1>
 
-        <p>Commands</p>
+        <h2>Assumptions & Limitations</h2>
+
+        <li>path delimeter is '/'</li>
+        <li>root directory is '/'</li>
+        <li>all path parameters must be full-path. (start from /)</li>
+        <li>all file and directory names must not have any space characters</li>
+        <li>properties are toggle values. change property twice will turn on and off.</li>
+        <li>move operation does not support moving directories.</li>
+        <li>move operation will replace file if target already exist.</li>
+
+        <h2>Commands</h2>
+
         <CommandInput handler={this} command="add directory /a" />
-        <CommandInput handler={this} command="add directory /b/a/c" />
-        <CommandInput handler={this} command="add file /b/b/k" />
+        <CommandInput handler={this} command="add directory /b/a/c" comment="Non-existing directories will be created automatically."/>
+        <CommandInput handler={this} command="add file /b/b/k" comment="Non-existing directories will be created automatically."/>
         <CommandInput handler={this} command="add file /b/b/m" />
         <CommandInput handler={this} command="link /a /b/a/c/a" />
-        <CommandInput handler={this} command="move /b/b/m /a/" />
-        <CommandInput handler={this} command="change /b/b hide" />
+        <CommandInput handler={this} command="move /b/b/m /a/" comment="Moving directory is not supported."/>
+        <CommandInput handler={this} command="change /b/b hide" comment="Toggle properties, apply children recursively."/>
         <CommandInput handler={this} command="" />
 
-        <p>File System Tree</p>
+        <button onClick={this.reset}>Reset</button>
+
+        <h2>File System Tree</h2>
         <FileSystemTree entry={this.state.root}></FileSystemTree>
       </div>
     );
+  }
+
+  reset(e: any) {
+    e.preventDefault();
+    window.location.reload()
   }
 
   onCommand(input: string): void {

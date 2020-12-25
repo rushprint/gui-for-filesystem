@@ -7,6 +7,7 @@ export interface CommandInputHandler {
 interface CommandInputProperties {
     command: string
     handler: CommandInputHandler
+    comment?: string
 }
 
 export class CommandInput extends Component<CommandInputProperties> {
@@ -22,7 +23,7 @@ export class CommandInput extends Component<CommandInputProperties> {
         return (
             <div>
                 <input defaultValue={this.props.command} onChange={this.onInputChange}></input>
-                <button onClick={this.onClick}>Run</button>
+                <button onClick={this.onClick}>Run</button> {this.props.comment}
             </div>
         )
     }

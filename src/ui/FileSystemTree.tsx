@@ -21,7 +21,7 @@ export class Entry extends Component<EntryProperties> {
                         postfix = '/'
                     break
                 case FileType.Link:
-                    postfix = entry.origin()
+                    postfix = ` -> ${entry.origin()}`
                     break
                 default:
                     break;
@@ -31,9 +31,14 @@ export class Entry extends Component<EntryProperties> {
                 postfix = ''
             }
 
+            let properties = ''
+            if(entry.properties().length > 0) {
+                properties =  `(${entry.properties().join(',')})`
+            }
+
             tags.push(
                 <div key="__node__" style={{ paddingLeft: entry.depth() * STEP_SIZE }}>
-                    {entry.name()}{postfix} ({entry.properties().join(',')})
+                    {entry.name()}{postfix} {properties}
                 </div>
             )
 
