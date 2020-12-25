@@ -22,7 +22,7 @@ export interface FileEntry {
  * A Simple virtual file system.
  *
  * Assumptions & Limitations
- * - path delimeter is '/'
+ * - path delimiter is '/'
  * - root directory is '/'
  * - properties are toggle values. change property twice will turn on and off.
  * - all path parameters must be full-path. (start from /)

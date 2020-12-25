@@ -13,4 +13,11 @@ This project is for **personal** use. Please ignore this repository.
 
 ```bash
 $ yarn start
+$ yarn test -- --verbose
 ```
+
+
+## TODOs
+
+- delete operation
+- move directory
