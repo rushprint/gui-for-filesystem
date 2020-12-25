@@ -52,7 +52,7 @@ export class FileSystemTree extends Component<FileSystemTreeProperties> {
     render() {
         return (
             <div>
-                <Entry entry={this.props.fs.getDirectory('/')} />
+                <Entry entry={this.props.fs.getEntry('/')} />
             </div>
         )
     }
