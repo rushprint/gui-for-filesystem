@@ -76,6 +76,7 @@ export class VirtualFileSystem implements FileSystem {
             parsedDst.name = parsedSrc.name
         }
 
+        //  NOTE: It is better than just comparing srcPath and dstPath, it can cover "move /a /" case.
         if(isSameArray(parsedSrc.dirs, parsedDst.dirs) && (parsedSrc.name === parsedDst.name)) {
             throw new AlreadyExist("Source and target is same")
         }
@@ -167,7 +168,7 @@ export class VirtualFileSystem implements FileSystem {
 
         const parent = this._getDirectoryEntry(parsed)
         if(!parent) {
-            throw new InvalidPath(path)
+            throw new DirectoryNotFound(path)
         }
 
         if(!parsed.name) {
