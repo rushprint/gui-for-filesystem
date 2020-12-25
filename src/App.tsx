@@ -65,7 +65,6 @@ class App extends React.Component<AppProperties, AppState> implements CommandInp
         <li>Moved items will keep old properties.</li>
         <li>Newly created items won’t inherit properties from the parent directory.</li>
 
-
         <h2>Exceptions</h2>
 
         <h4>Create directory</h4>
@@ -93,11 +92,9 @@ class App extends React.Component<AppProperties, AppState> implements CommandInp
         <li>DirectoryNotFound: Target directory not found</li>
         <li>FileNotFound: Target file not found</li>
 
-        <h2>Test Result</h2>
-        <pre>
-          $ yarn test -- --verbose
-        </pre>
-        <img src="test_result.jpg"/>
+        <h4>Delete</h4>
+        <li>DirectoryNotFound: Target directory not found</li>
+        <li>FileNotFound: Target file not found</li>
       </div>
     );
   }
