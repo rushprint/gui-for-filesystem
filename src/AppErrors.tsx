@@ -18,8 +18,3 @@ export class UnknownCommand extends Error {
     }
 }
 
-export class PathNotExist extends Error {
-    constructor() {
-        super('Path not exist')
-    }
-}
