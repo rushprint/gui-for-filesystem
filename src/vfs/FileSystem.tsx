@@ -29,6 +29,8 @@ export interface FileEntry {
  * - all parameter path must be full path(start from /)
  * - all file and directory names must not have any space characters
  * - move operation accept full path only for both of source and destination
+ * - move operation will fail if target is already exist. <= can be implemented to replace.
+ * - move operation does not support moving directories.
  */
 
 export interface FileSystem {

@@ -1,12 +1,19 @@
+
 export class InvalidPath extends Error {
     constructor(path: string) {
         super(`Invalid path: ${path}`)
     }
 }
 
-export class PathNotExist extends Error {
-    constructor(path?: string) {
-        super(path ? `Not Found Entry: ${path}` : `Directory Not Found`)
+export class DirectoryNotFound extends Error {
+    constructor(path: string) {
+        super(`Directory Not Found: ${path}`)
+    }
+}
+
+export class FileNotFound extends Error {
+    constructor(path: string) {
+        super(`File Not Found: ${path}`)
     }
 }
 
@@ -16,15 +23,8 @@ export class AlreadyExist extends Error {
     }
 }
 
-export class ParentIsNotDirectory extends Error {
-    constructor() {
-        super(`Parent is not directory`)
-    }
-}
-
 export class LoopLinkIsNotAllowed extends Error {
     constructor() {
         super(`Loop link is not allowed`)
     }
 }
-

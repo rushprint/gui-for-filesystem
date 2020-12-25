@@ -1,31 +1,12 @@
 import { FileEntry, FileSystem, FileType } from "./FileSystem";
+import { ParsedPath, parsePath } from "./Path";
+import { isSameArray } from "./Utils";
 import { VirtualFileEntry } from "./VirfualFileEntry";
-import { AlreadyExist, InvalidPath, LoopLinkIsNotAllowed, PathNotExist } from "./VirtualFileSystemErrors";
-
-interface ParsedPath {
-    dirs: string[]
-    name: string
-}
+import { AlreadyExist, DirectoryNotFound, FileNotFound, InvalidPath, LoopLinkIsNotAllowed } from "./VirtualFileSystemErrors";
 
 export class VirtualFileSystem implements FileSystem {
 
     private readonly _root = new VirtualFileEntry(FileType.Directory, '/')
-
-    createDirectory(path: string) {
-        //  parse path
-        const parsed = this._parsePath(path)
-
-        //  creating root directory is not allowed.
-        if((parsed.dirs.length === 0) && !parsed.name) {
-            throw new InvalidPath('Cannot create root(/) directory')
-        }
-
-        //  get parent directory
-        const parent = this._getNode(parsed.dirs)
-
-        //  create child directory.
-        parent.addChild(new VirtualFileEntry(FileType.Directory, parsed.name))
-    }
 
     createDirectories(paths: string[]) {
         for(const dir of paths) {
@@ -33,24 +14,21 @@ export class VirtualFileSystem implements FileSystem {
         }
     }
 
-    createFile(path: string) {
+    createDirectory(path: string) {
+
         //  parse path
-        const parsed = this._parsePath(path)
+        const parsed = parsePath(path)
+
+        if(parsed.name) {
+            parsed.dirs.push(parsed.name)
+        }
 
         //  creating root directory is not allowed.
-        if((parsed.dirs.length === 0) && !parsed.name) {
-            throw new InvalidPath('Cannot create root(/) file')
+        if(parsed.isRoot()) {
+            throw new InvalidPath('Creating root(/) directory is not allowed')
         }
 
-        if(parsed.name === '') {
-            throw new InvalidPath(path)
-        }
-
-        //  get parent directory
-        const parent = this._getNode(parsed.dirs)
-
-        //  create child file.
-        parent.addChild(new VirtualFileEntry(FileType.File, parsed.name))
+        this._createDiretory(parsed.dirs)
     }
 
     createFiles(paths: string[]) {
@@ -59,118 +37,168 @@ export class VirtualFileSystem implements FileSystem {
         }
     }
 
-    move(srcPath: string, destPath: string) {
-        // parse
-        const src = this._parsePath(srcPath)
-        const dest = this._parsePath(destPath)
+    createFile(path: string) {
+        //  parse path
+        const parsed = parsePath(path)
 
-        // check src or dest == /
-        if((src.dirs.length === 0) && !src.name) {
-            throw new InvalidPath('Cannot move root(/) directory')
-        }
-        if((dest.dirs.length === 0) && !dest.name) {
-            throw new InvalidPath('Cannot move to root(/) directory')
+        if(!parsed.name) {
+            throw new InvalidPath(path)
         }
 
-        //  check if target is already exists.
-        const destParent = this._getNode(dest.dirs)
-        const destNode = destParent.getChild(dest.name)
-        if(destNode) {
-            throw new AlreadyExist(destPath)
+        //  get parent directory
+        const parent = this._createDiretory(parsed.dirs)
+        if(!parent) {
+            throw new InvalidPath(path)
         }
 
-        const srcParent = this._getNode(src.dirs)
-        const target = srcParent.getChild(src.name)
-        if(!target) {
-            throw new PathNotExist(srcPath)
+        //  check already exists.
+        if(parent.getChild(parsed.name)) {
+            throw new AlreadyExist(path)
         }
-        target.setName(dest.name)
-        destParent.addChild(target)
-        srcParent.removeChild(src.name)
+
+        //  create child file.
+        parent.addChild(new VirtualFileEntry(FileType.File, parsed.name))
     }
 
-    link(srcPath: string, destPath: string) {
-        // parse
-        const src = this._parsePath(srcPath)
-        const dest = this._parsePath(destPath)
+    // Limitations
+    // - Only support file source.
+    move(srcPath: string, dstPath: string) {
 
-        // check src or dest == /
-        if((src.dirs.length === 0) && !src.name) {
-            throw new InvalidPath('Cannot link root(/) directory')
+        //  find source.
+        const parsedSrc = parsePath(srcPath)
+        if(!parsedSrc.name) {
+            throw new InvalidPath(srcPath)
         }
-        if((dest.dirs.length === 0) && !dest.name) {
-            throw new InvalidPath('Cannot link to root(/) directory')
-        }
+        // console.log(srcPath, '=>', parsedSrc);
 
-        //  check if target is already exists.
-        const destParent = this._getNode(dest.dirs)
-        const destNode = destParent.getChild(dest.name)
-        if(destNode) {
-            throw new AlreadyExist(destPath)
+        const parsedDst = parsePath(dstPath)
+        if(!parsedDst.name) {
+            parsedDst.name = parsedSrc.name
         }
 
-        const srcParent = this._getNode(src.dirs)
-        const target = srcParent.getChild(src.name)
-        if(!target) {
-            throw new PathNotExist(srcPath)
+        if(isSameArray(parsedSrc.dirs, parsedDst.dirs) && (parsedSrc.name === parsedDst.name)) {
+            throw new AlreadyExist("Source and target is same")
+        }
+
+        //  find source file
+        const srcDir = this._getDirectoryEntry(parsedSrc)
+        if(!srcDir) {
+            throw new DirectoryNotFound(parsedSrc.dirPath())
+        }
+        const src = srcDir.getChild(parsedSrc.name)
+        if(!src) {
+            throw new FileNotFound(srcPath)
+        }
+
+        //  find destination dir
+        const dstDir = this._createDiretory(parsedDst.dirs)
+
+        // NOTE: DO NOT CHECK DUPLICATION => Will be repalced
+        // const dst = dstDir.getChild(parsedDst.name)
+        // if(dst) {
+        //     throw new AlreadyExist(dstPath)
+        // }
+
+        src.setName(parsedDst.name)
+        dstDir.addChild(src)
+        srcDir.removeChild(parsedSrc.name)
+
+        this._dump()
+    }
+
+    link(srcPath: string, dstPath: string) {
+
+        //  find source.
+        const parsedSrc = parsePath(srcPath)
+        if(!parsedSrc.isFile()) {
+            parsedSrc.name = parsedSrc.dirs.pop()
+        }
+        if(!parsedSrc.name) {
+            throw new InvalidPath("Moving root(/) directory is not allowed")
+        }
+
+        const srcDir = this._getDirectoryEntry(parsedSrc)
+        if(!srcDir) {
+            throw new DirectoryNotFound(parsedSrc.dirPath())
+        }
+        const src = srcDir.getChild(parsedSrc.name)
+        if(!src) {
+            throw new FileNotFound(srcPath)
+        }
+
+        //  find destination
+        const parsedDst = parsePath(dstPath)
+        if(!parsedDst.isFile()) {
+            parsedDst.name = parsedDst.dirs.pop()
+        }
+        if(!parsedDst.name) {
+            throw new InvalidPath("Replacing root(/) directory is not allowed")
+        }
+        const dstDir = this._createDiretory(parsedDst.dirs)
+        const dst = dstDir.getChild(parsedDst.name)
+        if(dst) {
+            //  We can handle this error => Replace
+            throw new AlreadyExist(dstPath)
         }
 
         //  check link loop <- Requirement.
         // Note:
         // - Linking parent directory into it's subdirectory cause loop link problem. (In real file system it is no problem.)
         // - While linking a subdirectory into it's parent directory does not cause the problem.
-        if(destPath.startsWith(srcPath)) {
+        if(dstPath.startsWith(srcPath)) {
             throw new LoopLinkIsNotAllowed()
         }
 
-        destParent.addChild(new VirtualFileEntry(FileType.Link, dest.name, srcPath))
+        dstDir.addChild(new VirtualFileEntry(FileType.Link, parsedDst.name, srcPath))
     }
 
     change(path: string, property: string) {
-        //  parse path
-        const parsed = this._parsePath(path)
-
-        let target = this._root
-        if((parsed.dirs.length === 0) && !parsed.name) {
-            target = this._root
-        } else {
-            const parent = this._getNode(parsed.dirs)
-            const child = parent.getChild(parsed.name)
-            if(!child) {
-                throw new PathNotExist(path)
-            }
-            target = child
-        }
+        const target = this._getEntry(path)
 
         //  toggle property
         target.toggleProperty(property)
     }
 
     getEntry(path: string): FileEntry {
-        const parsed = this._parsePath(path)
-        try {
-            if((parsed.dirs.length === 0) && !parsed.name) {
-                return this._root
-            }
-
-            const parent = this._getNode(parsed.dirs)
-            const target = parent.getChild(parsed.name)
-            if(!target) {
-                throw new PathNotExist(path)
-            }
-            return target
-        } catch (e) {
-            throw new PathNotExist(path)
-        }
+        return this._getEntry(path)
     }
 
-    private _getNode(dirs: string[]): VirtualFileEntry {
+    private _getEntry(path: string): VirtualFileEntry {
+
+        const parsed = parsePath(path)
+
+        if(parsed.isRoot()) {
+            return this._root
+        }
+
+        const parent = this._getDirectoryEntry(parsed)
+        if(!parent) {
+            throw new InvalidPath(path)
+        }
+
+        if(!parsed.name) {
+            return parent
+        }
+
+        const target = parent.getChild(parsed.name)
+        if(!target) {
+            throw new FileNotFound(path)
+        }
+
+        return target
+    }
+
+    private _getDirectoryEntry(parsed: ParsedPath): VirtualFileEntry|undefined {
+
         let node: VirtualFileEntry = this._root
 
-        for(const dir of dirs) {
+        for(const dir of parsed.dirs) {
             const child = node.getChild(dir)
             if(!child) {
-                throw new PathNotExist('/' + dirs.join('/'))
+                throw new DirectoryNotFound(parsed.dirPath())
+            }
+            if(child.type() !== FileType.Directory) {
+                throw new DirectoryNotFound(parsed.dirPath())
             }
             node = child
         }
@@ -178,27 +206,35 @@ export class VirtualFileSystem implements FileSystem {
         return node
     }
 
-    // TODO: need to split file path and directory path
-    private _parsePath(path: string): ParsedPath {
+    private _createDiretory(pathNames: string[]): VirtualFileEntry {
+        // console.log("creating dirs:", pathNames);
 
-        if(!path || !path.startsWith('/')) {
-            throw new InvalidPath(path)
-        }
+        let parent = this._root
+        const progress = []
 
-        const dirs = path.split('/')
-        dirs.shift()
-        const name = dirs.pop()
+        for(const name of pathNames) {
+            progress.push(name)
 
-        if(name) {
-            return {
-                dirs: dirs,
-                name: name
+            const exist = parent.getChild(name)
+            if(exist) {
+                if(exist.type() === FileType.Directory) {
+                    parent = exist
+                    // console.log(`child directory ${name} exists`);
+                    continue
+                } else {
+                    throw new AlreadyExist(`/${progress.join('/')} is not directory`)
+                }
+            } else {
+                // console.log(`create child directory ${name}`);
+                const child = new VirtualFileEntry(FileType.Directory, name)
+                parent.addChild(child)
+                parent = child
             }
-        } else {
-            return {
-                dirs: dirs,
-                name: ''
-            }
         }
+        return parent
+    }
+
+    private _dump() {
+        this._root.dump('');
     }
 }

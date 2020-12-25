@@ -1,5 +1,4 @@
 import { FileEntry, FileType } from "./FileSystem"
-import { AlreadyExist, ParentIsNotDirectory } from "./VirtualFileSystemErrors"
 
 export class VirtualFileEntry implements FileEntry {
     private _parent: VirtualFileEntry|null = null
@@ -53,17 +52,7 @@ export class VirtualFileEntry implements FileEntry {
     }
 
     addChild(child: VirtualFileEntry) {
-
-        if(this._type !== FileType.Directory) {
-            throw new ParentIsNotDirectory()
-        }
-
-        if(this._children.has(child.name())) {
-            throw new AlreadyExist(child.name())
-        }
-
         child.setParent(this)
-
         this._children.set(child.name(), child)
     }
 
@@ -108,6 +97,15 @@ export class VirtualFileEntry implements FileEntry {
             for(const child of Array.from(this._children.values())) {
                 child.propertyOff(property)
             }
+        }
+    }
+
+    dump(prefix: string) {
+        return
+        console.log(prefix, this._name);
+
+        for(const child of Array.from(this._children.values())) {
+            child.dump(prefix + '    ')
         }
     }
 }
