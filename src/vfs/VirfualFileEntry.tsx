@@ -28,7 +28,11 @@ export class VirtualFileEntry implements FileEntry {
     }
 
     children() : FileEntry[] {
-        return Array.from(this._children.values())
+        const all = Array.from(this._children.values())
+        all.sort((a: FileEntry, b: FileEntry): number => {
+            return a.type() - b.type()
+        });
+        return all
     }
 
     origin(): string|undefined {
@@ -52,6 +56,8 @@ export class VirtualFileEntry implements FileEntry {
     }
 
     addChild(child: VirtualFileEntry) {
+        // console.log(`add child: ${this._name} <- ${child._name}`);
+
         child.setParent(this)
         this._children.set(child.name(), child)
     }

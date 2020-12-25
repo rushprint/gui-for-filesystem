@@ -93,15 +93,9 @@ export class VirtualFileSystem implements FileSystem {
         //  find destination dir
         const dstDir = this._createDiretory(parsedDst.dirs)
 
-        // NOTE: DO NOT CHECK DUPLICATION => Will be repalced
-        // const dst = dstDir.getChild(parsedDst.name)
-        // if(dst) {
-        //     throw new AlreadyExist(dstPath)
-        // }
-
+        srcDir.removeChild(parsedSrc.name)
         src.setName(parsedDst.name)
         dstDir.addChild(src)
-        srcDir.removeChild(parsedSrc.name)
 
         this._dump()
     }
@@ -207,8 +201,6 @@ export class VirtualFileSystem implements FileSystem {
     }
 
     private _createDiretory(pathNames: string[]): VirtualFileEntry {
-        // console.log("creating dirs:", pathNames);
-
         let parent = this._root
         const progress = []
 
