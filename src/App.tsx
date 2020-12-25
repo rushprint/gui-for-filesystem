@@ -3,10 +3,30 @@ import { CommandInput, CommandInputHandler } from "./ui/CommandInput"
 import './App.css';
 import { Command, parseCommand } from './Commands';
 import { VirtualFileSystem } from './vfs/VirtualFileSystem';
-import { FileSystem } from './vfs/FileSystem';
+import { FileEntry, FileSystem } from './vfs/FileSystem';
 import { FileSystemTree } from './ui/FileSystemTree';
 
-class App extends React.Component implements CommandInputHandler {
+interface AppProperties {
+
+}
+
+interface AppState {
+  root: FileEntry
+}
+
+class App extends React.Component<AppProperties, AppState> implements CommandInputHandler {
+
+  /////////////////////////////////////////////////////////////////
+
+  private readonly fileSystem: FileSystem = new VirtualFileSystem()
+
+  constructor(props: AppProperties) {
+    super(props)
+    this.state = {
+      root: this.fileSystem.getEntry('/')
+    }
+  }
+
   render() {
     return (
       <div>
@@ -23,14 +43,10 @@ class App extends React.Component implements CommandInputHandler {
         <CommandInput handler={this} command="" />
 
         <p>File System Tree</p>
-        <FileSystemTree fs={this.fileSystem}></FileSystemTree>
+        <FileSystemTree entry={this.state.root}></FileSystemTree>
       </div>
     );
   }
-
-  /////////////////////////////////////////////////////////////////
-
-  private readonly fileSystem: FileSystem = new VirtualFileSystem()
 
   onCommand(input: string): void {
     console.log(input)
@@ -55,6 +71,11 @@ class App extends React.Component implements CommandInputHandler {
           this.fileSystem.change(parsed.params[0], parsed.params[1]);
           break;
       }
+
+      this.setState({
+        root: this.fileSystem.getEntry('/')
+      })
+
     } catch (e) {
       window.alert(e)
     }

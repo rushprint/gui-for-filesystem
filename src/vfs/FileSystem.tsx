@@ -6,12 +6,16 @@ export enum FileType {
 }
 
 export interface FileEntry {
-    type(): FileType        //  entry type
-    name(): string          //  entry name
+    type(): FileType
+    depth(): number
+    name(): string
+
     properties(): string[]
     haveProperty(property: string): boolean
+
     children(): FileEntry[]
-    depth(): number
+
+    origin(): string|undefined;   //  if entry is link then returns indicate orginal path.
 }
 
 /**

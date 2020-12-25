@@ -16,7 +16,7 @@ export class VirtualFileSystem implements FileSystem {
         const parsed = this._parsePath(path)
 
         //  creating root directory is not allowed.
-        if((parsed.dirs.length == 0) && !parsed.name) {
+        if((parsed.dirs.length === 0) && !parsed.name) {
             throw new InvalidPath('Cannot create root(/) directory')
         }
 
@@ -38,7 +38,7 @@ export class VirtualFileSystem implements FileSystem {
         const parsed = this._parsePath(path)
 
         //  creating root directory is not allowed.
-        if((parsed.dirs.length == 0) && !parsed.name) {
+        if((parsed.dirs.length === 0) && !parsed.name) {
             throw new InvalidPath('Cannot create root(/) file')
         }
 
@@ -65,10 +65,10 @@ export class VirtualFileSystem implements FileSystem {
         const dest = this._parsePath(destPath)
 
         // check src or dest == /
-        if((src.dirs.length == 0) && !src.name) {
+        if((src.dirs.length === 0) && !src.name) {
             throw new InvalidPath('Cannot move root(/) directory')
         }
-        if((dest.dirs.length == 0) && !dest.name) {
+        if((dest.dirs.length === 0) && !dest.name) {
             throw new InvalidPath('Cannot move to root(/) directory')
         }
 
@@ -95,10 +95,10 @@ export class VirtualFileSystem implements FileSystem {
         const dest = this._parsePath(destPath)
 
         // check src or dest == /
-        if((src.dirs.length == 0) && !src.name) {
+        if((src.dirs.length === 0) && !src.name) {
             throw new InvalidPath('Cannot link root(/) directory')
         }
-        if((dest.dirs.length == 0) && !dest.name) {
+        if((dest.dirs.length === 0) && !dest.name) {
             throw new InvalidPath('Cannot link to root(/) directory')
         }
 
@@ -131,7 +131,7 @@ export class VirtualFileSystem implements FileSystem {
         const parsed = this._parsePath(path)
 
         let target = this._root
-        if((parsed.dirs.length == 0) && !parsed.name) {
+        if((parsed.dirs.length === 0) && !parsed.name) {
             target = this._root
         } else {
             const parent = this._getNode(parsed.dirs)
@@ -149,6 +149,10 @@ export class VirtualFileSystem implements FileSystem {
     getEntry(path: string): FileEntry {
         const parsed = this._parsePath(path)
         try {
+            if((parsed.dirs.length === 0) && !parsed.name) {
+                return this._root
+            }
+
             const parent = this._getNode(parsed.dirs)
             const target = parent.getChild(parsed.name)
             if(!target) {

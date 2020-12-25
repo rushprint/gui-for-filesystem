@@ -1,59 +1,60 @@
 import { Component } from "react"
-import { FileEntry, FileSystem, FileType } from "../vfs/FileSystem"
+import { FileEntry, FileType } from "../vfs/FileSystem"
 
 interface EntryProperties {
-    entry: FileEntry|null
+    entry: FileEntry | null
 }
+
+const STEP_SIZE = 30
 
 export class Entry extends Component<EntryProperties> {
 
     render() {
         const entry = this.props.entry
-        if(entry) {
-            const tags = []
-            for(const child of entry.children()) {
-                tags.push(<Entry entry={child} />)
-            }
+        const tags = []
+        if (entry) {
 
+            let postfix
             switch (entry.type()) {
                 case FileType.Directory:
-                    tags.unshift(
-                        <div style={{ paddingLeft: entry.depth() * 10 }}>
-                            {entry.name()} 'dir'
-                        </div>
-                    )
-                    break;
-                case FileType.File:
-                    tags.unshift(
-                        <div style={{ paddingLeft: entry.depth() * 10 }}>
-                            {entry.name()} 'file'
-                        </div>
-                    )
-                    break;
+                    if(entry.name() !== '/')
+                        postfix = '/'
+                    break
                 case FileType.Link:
-                    tags.unshift(
-                        <div style={{ paddingLeft: entry.depth() * 10 }}>
-                            {entry.name()} 'link'
-                        </div>
-                    )
+                    postfix = entry.origin()
+                    break
+                default:
                     break;
             }
-            return tags
+
+            if(!postfix) {
+                postfix = ''
+            }
+
+            tags.push(
+                <div key="__node__" style={{ paddingLeft: entry.depth() * STEP_SIZE }}>
+                    {entry.name()}{postfix} ({entry.properties().join(',')})
+                </div>
+            )
+
+            for (const child of entry.children()) {
+                tags.push(
+                    <Entry key={child.name()} entry={child} />
+                )
+            }
+        } else {
+            tags.push(<></>)
         }
+
+        return tags;
     }
 }
 
-interface FileSystemTreeProperties {
-    fs: FileSystem
-}
-
-export class FileSystemTree extends Component<FileSystemTreeProperties> {
+export class FileSystemTree extends Component<EntryProperties> {
 
     render() {
         return (
-            <div>
-                <Entry entry={this.props.fs.getEntry('/')} />
-            </div>
+            <Entry entry={this.props.entry} />
         )
     }
 }

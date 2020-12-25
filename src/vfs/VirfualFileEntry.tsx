@@ -32,19 +32,23 @@ export class VirtualFileEntry implements FileEntry {
         return Array.from(this._children.values())
     }
 
+    origin(): string|undefined {
+        return this._source
+    }
+
     depth(): number {
         let d = 0;
-        let parent = this._parent
-        while(parent) {
+        let node: VirtualFileEntry = this
+        while(node._parent) {
             d++
-            parent = parent._parent
+            node = node._parent
         }
         return d
     }
 
     // Internal use only.
 
-    setParent(parent: VirtualFileEntry) {
+    setParent(parent: VirtualFileEntry|null) {
         this._parent = parent
     }
 
@@ -58,11 +62,17 @@ export class VirtualFileEntry implements FileEntry {
             throw new AlreadyExist(child.name())
         }
 
+        child.setParent(this)
+
         this._children.set(child.name(), child)
     }
 
     removeChild(name: string) {
-        this._children.delete(name)
+        const child = this._children.get(name)
+        if(child) {
+            this._children.delete(name)
+            child.setParent(null)
+        }
     }
 
     setName(name: string): void {
