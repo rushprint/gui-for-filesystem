@@ -1,7 +1,7 @@
 import React from 'react';
 import { CommandInput, CommandInputHandler } from "./ui/CommandInput"
 import './App.css';
-import { Command, parseCommand } from './Commands';
+import { Command, CommandAndParams, parseCommand } from './Commands';
 import { VirtualFileSystem } from './vfs/VirtualFileSystem';
 import { FileEntry, FileSystem } from './vfs/FileSystem';
 import { FileSystemTree } from './ui/FileSystemTree';
@@ -48,14 +48,9 @@ class App extends React.Component<AppProperties, AppState> implements CommandInp
         <h2>File System Tree</h2>
         <FileSystemTree entry={this.state.root}></FileSystemTree>
 
-        <h2>Requirements</h2>
-
-        <li>path delimeter is '/'</li>
-
-
         <h2>Assumptions & Limitations</h2>
 
-        <li>path delimeter is '/'</li>
+        <li>path delimiter is '/'</li>
         <li>root directory is '/'</li>
         <li>all path parameters must be full-path. (start from /)</li>
         <li>all file and directory names must not have any space characters</li>
@@ -110,7 +105,18 @@ class App extends React.Component<AppProperties, AppState> implements CommandInp
     try {
       const parsed = parseCommand(input)
 
-      //  handle commands.
+      this.handleCommand(parsed)
+
+      this.setState({
+        root: this.fileSystem.getEntry('/')
+      })
+
+    } catch (e) {
+      window.alert(e)
+    }
+  }
+
+  private handleCommand(parsed: CommandAndParams) {
       switch (parsed.command) {
         case Command.AddDir:
           this.fileSystem.createDirectories(parsed.params);
@@ -128,14 +134,6 @@ class App extends React.Component<AppProperties, AppState> implements CommandInp
           this.fileSystem.change(parsed.params[0], parsed.params[1]);
           break;
       }
-
-      this.setState({
-        root: this.fileSystem.getEntry('/')
-      })
-
-    } catch (e) {
-      window.alert(e)
-    }
   }
 }
 
